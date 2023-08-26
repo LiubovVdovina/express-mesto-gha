@@ -1,6 +1,15 @@
 [![Tests](../../actions/workflows/tests-13-sprint.yml/badge.svg)](../../actions/workflows/tests-13-sprint.yml) [![Tests](../../actions/workflows/tests-14-sprint.yml/badge.svg)](../../actions/workflows/tests-14-sprint.yml)
-# Проект Mesto фронтенд + бэкенд
+# Проект Mesto бэкенд
+13 учебный проект курса Яндекс Пратикум - Веб разработчик.
 
+## Используемые техники и технологии
+- Express
+- Node JS
+- MongoDB
+- Mongoose
+
+## Ссылка на репозиторий
+https://github.com/LiubovVdovina/express-mesto-gha
 
 ## Директории
 
