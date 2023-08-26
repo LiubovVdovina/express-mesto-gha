@@ -2,13 +2,8 @@ const Card = require('../models/card');
 
 function getCards(req, res) {
   Card.find({})
-    .then((cards) => {
-      if(cards.length === 0) {
-        res.status(404).send({message: 'Нет карточек'});
-        return;
-      }
-      res.status(200).send({ cards })
-    })
+    .orFail(() => res.status(404).send({ message: 'Карточки не найдены' }))
+    .then(cards => res.status(200).send({ cards }))
     .catch(err => res.status(500).send({ message: 'Внутренняя ошибка сервера' }))
 }
 
