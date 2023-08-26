@@ -27,10 +27,11 @@ function getUsers(req, res) {
 
 function getUser(req, res) {
   User.findById(req.params.userId)
+    .orFail(() => res.status(404).send({ message: 'Пользователь с переданным id не найден' }))
     .then(user => res.status(200).send({ user }))
     .catch((err) => {
       if(err.name === "CastError") {
-        res.status(404).send({ message: 'Пользователь с переданным id не найден' });
+        res.status(400).send({ message: 'Передан некорректный id пользователя' });
       } else {
         res.status(500).send({ message: 'Внутренняя ошибка сервера'})
       }
@@ -39,7 +40,7 @@ function getUser(req, res) {
 
 function updateUser(req, res) {
   const { name, about } = req.body;
-  User.findByIdAndUpdate(req.user._id, { name, about }, { new: true })
+  User.findByIdAndUpdate(req.user._id, { name, about }, { new: true, runValidators: true  })
     .then(user => res.status(200).send({ user }))
     .catch((err) => {
       if(err.name === "ValidationError") {
@@ -54,7 +55,7 @@ function updateUser(req, res) {
 
 function updateAvatar(req, res) {
   console.log(`Запущен контроллер обновления аватара пользователя ${req.user._id} на ссылку ${req.body.avatar}`);
-  User.findByIdAndUpdate(req.user._id, { avatar: req.body.avatar }, { new: true })
+  User.findByIdAndUpdate(req.user._id, { avatar: req.body.avatar }, { new: true, runValidators: true })
     .then(user => res.status(200).send({ user }))
     .catch((err) => {
       if(err.name === "ValidationError") {

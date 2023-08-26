@@ -28,10 +28,11 @@ function createCard(req, res) {
 
 function deleteCard(req, res) {
   Card.findByIdAndRemove(req.params.cardId)
+    .orFail(() => res.status(404).send({ message: 'Карточка с переданным id не найдена' }))
     .then(card => res.status(200).send({ card }))
     .catch((err) => {
       if(err.name === "CastError") {
-        res.status(404).send({ message: 'Карточка с переданным id не найдена' });
+        res.status(400).send({ message: 'Переданы некорректные данные' });
       } else {
         res.status(500).send({ message: 'Внутренняя ошибка сервера'})
       }
