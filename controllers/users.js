@@ -8,7 +8,7 @@ function createUser(req, res) {
       if(err.name === "ValidationError") {
         res.status(400).send({ message: 'Переданы некорректные данные' })
       } else {
-        res.status(500).send({ message: 'Внутренняя ошибка сервера' })
+        res.status(500).send({ message: 'На сервере произошла ошибка' })
       }
     });
 }
@@ -22,7 +22,7 @@ function getUsers(req, res) {
       }
       res.status(200).send({ users })
     })
-    .catch(err => res.status(500).send({ message: 'Внутренняя ошибка сервера' }))
+    .catch(err => res.status(500).send({ message: 'На сервере произошла ошибка' }))
 }
 
 function getUser(req, res) {
@@ -33,7 +33,7 @@ function getUser(req, res) {
       if(err.name === "CastError") {
         res.status(400).send({ message: 'Передан некорректный id пользователя' });
       } else {
-        res.status(500).send({ message: 'Внутренняя ошибка сервера'})
+        res.status(500).send({ message: 'На сервере произошла ошибка'})
       }
     })
 }
@@ -48,7 +48,7 @@ function updateUser(req, res) {
       } else if (err.name === "CastError") {
         res.status(404).send({ message: 'Пользователь с переданным id не найден' });
       } else {
-        res.status(500).send({ message: 'Внутренняя ошибка сервера'})
+        res.status(500).send({ message: 'На сервере произошла ошибка'})
       }
     })
 }
@@ -63,7 +63,7 @@ function updateAvatar(req, res) {
       } else if (err.name === "CastError") {
         res.status(404).send({ message: 'Пользователь с переданным id не найден' });
       } else {
-        res.status(500).send({ message: 'Внутренняя ошибка сервера'})
+        res.status(500).send({ message: 'На сервере произошла ошибка'})
       }
     })
 }

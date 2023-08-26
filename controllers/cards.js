@@ -4,7 +4,7 @@ function getCards(req, res) {
   Card.find({})
     .orFail(() => res.status(404).send({ message: 'Карточки не найдены' }))
     .then(cards => res.status(200).send({ cards }))
-    .catch(err => res.status(500).send({ message: 'Внутренняя ошибка сервера' }))
+    .catch(err => res.status(500).send({ message: 'На сервере произошла ошибка' }))
 }
 
 function createCard(req, res) {
@@ -16,7 +16,7 @@ function createCard(req, res) {
       if(err.name === "ValidationError") {
         res.status(400).send({ message: 'Переданы некорректные данные' })
       } else {
-        res.status(500).send({ message: 'Внутренняя ошибка сервера' })
+        res.status(500).send({ message: 'На сервере произошла ошибка' })
       }
     });
 }
@@ -29,7 +29,7 @@ function deleteCard(req, res) {
       if(err.name === "CastError") {
         res.status(400).send({ message: 'Переданы некорректные данные' });
       } else {
-        res.status(500).send({ message: 'Внутренняя ошибка сервера'})
+        res.status(500).send({ message: 'На сервере произошла ошибка'})
       }
     });
 }
@@ -42,7 +42,7 @@ function likeCard(req, res) {
       if(err.name === "CastError") {
         res.status(400).send({ message: 'Переданы некорректные данные для постановки лайка'})
       } else {
-        res.status(500).send({ message: 'Внутренняя ошибка сервера'})
+        res.status(500).send({ message: 'На сервере произошла ошибка'})
       }
     });
 }
@@ -55,7 +55,7 @@ function dislikeCard(req, res) {
       if(err.name === "CastError") {
         res.status(400).send({ message: 'Переданы некорректные данные для снятия лайка'})
       } else {
-        res.status(500).send({ message: 'Внутренняя ошибка сервера'})
+        res.status(500).send({ message: 'На сервере произошла ошибка'})
       }
     });
 }

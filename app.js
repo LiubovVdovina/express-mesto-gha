@@ -1,6 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
+const process = require('process');
 
 const { PORT = 3000 } = process.env;
 const app = express();
@@ -25,7 +26,10 @@ app.use('*', (req, res) => {
   });
 });
 
-
 app.listen(PORT, () => {
   console.log('Сервер запущен');
+});
+
+process.on('uncaughtException', (err, origin) => {
+  console.log(`${origin} ${err.name} c текстом ${err.message} не была обработана. Обратите внимание!`);
 });
