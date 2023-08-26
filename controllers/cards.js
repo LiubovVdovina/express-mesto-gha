@@ -27,7 +27,7 @@ function createCard(req, res) {
 }
 
 function deleteCard(req, res) {
-  Card.findByIdAndRemove(req.params.cardId)
+  Card.findByIdAndRemove(req.params.cardId, { new: true })
     .orFail(() => res.status(404).send({ message: 'Карточка с переданным id не найдена' }))
     .then(card => res.status(200).send({ card }))
     .catch((err) => {
