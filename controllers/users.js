@@ -15,7 +15,6 @@ function createUser(req, res) {
 
 function getUsers(req, res) {
   User.find({})
-    .orFail(() => res.status(500).send({message: 'Нет пользователей'}))
     .then((users) => res.status(200).send({ users }))
     .catch(err => res.status(500).send({ message: 'На сервере произошла ошибка' }))
 }

@@ -2,7 +2,6 @@ const Card = require('../models/card');
 
 function getCards(req, res) {
   Card.find({})
-    .orFail(() => res.status(200).send({message: 'Нет карточек'}))
     .then(cards => res.status(200).send({ cards }))
     .catch(err => res.status(500).send({ message: 'На сервере произошла ошибка' }))
 }
