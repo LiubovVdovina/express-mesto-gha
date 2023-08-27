@@ -6,7 +6,7 @@ function createUser(req, res) {
     .then(user => res.status(201).send({ user }))
     .catch((err) => {
       if(err.name === "ValidationError") {
-        res.status(400).send({ message: err.message })
+        res.status(400).send({ message: err.message.split(": ")[2] })
       } else {
         res.status(500).send({ message: 'На сервере произошла ошибка' })
       }
@@ -15,13 +15,8 @@ function createUser(req, res) {
 
 function getUsers(req, res) {
   User.find({})
-    .then((users) => {
-      if(users.length === 0) {
-        res.status(404).send({message: 'Нет пользователей'});
-        return;
-      }
-      res.status(200).send({ users })
-    })
+    .orFail(() => res.status(500).send({message: 'Нет пользователей'}))
+    .then((users) => res.status(200).send({ users }))
     .catch(err => res.status(500).send({ message: 'На сервере произошла ошибка' }))
 }
 
@@ -41,12 +36,13 @@ function getUser(req, res) {
 function updateUser(req, res) {
   const { name, about } = req.body;
   User.findByIdAndUpdate(req.user._id, { name, about }, { new: true, runValidators: true  })
+    .orFail(() => res.status(404).send({ message: 'Пользователь с переданным id не найден' }))
     .then(user => res.status(200).send({ user }))
     .catch((err) => {
       if(err.name === "ValidationError") {
-        res.status(400).send({ message: 'Переданы некорректные данные' })
+        res.status(400).send({ message: err.message.split(": ")[2] })
       } else if (err.name === "CastError") {
-        res.status(404).send({ message: 'Пользователь с переданным id не найден' });
+        res.status(400).send({ message: 'Переданы некорректные данные' });
       } else {
         res.status(500).send({ message: 'На сервере произошла ошибка'})
       }
@@ -56,12 +52,13 @@ function updateUser(req, res) {
 function updateAvatar(req, res) {
   console.log(`Запущен контроллер обновления аватара пользователя ${req.user._id} на ссылку ${req.body.avatar}`);
   User.findByIdAndUpdate(req.user._id, { avatar: req.body.avatar }, { new: true, runValidators: true })
+    .orFail(() => res.status(404).send({ message: 'Пользователь с переданным id не найден' }))
     .then(user => res.status(200).send({ user }))
     .catch((err) => {
       if(err.name === "ValidationError") {
-        res.status(400).send({ message: 'Переданы некорректные данные' })
+        res.status(400).send({ message: err.message.split(": ")[2] })
       } else if (err.name === "CastError") {
-        res.status(404).send({ message: 'Пользователь с переданным id не найден' });
+        res.status(400).send({ message: 'Переданы некорректные данные' });
       } else {
         res.status(500).send({ message: 'На сервере произошла ошибка'})
       }

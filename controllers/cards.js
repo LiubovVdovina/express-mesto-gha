@@ -2,6 +2,7 @@ const Card = require('../models/card');
 
 function getCards(req, res) {
   Card.find({})
+    .orFail(() => res.status(500).send({message: 'Нет карточек'}))
     .then(cards => res.status(200).send({ cards }))
     .catch(err => res.status(500).send({ message: 'На сервере произошла ошибка' }))
 }
@@ -13,7 +14,7 @@ function createCard(req, res) {
     .then(card => res.status(201).send({ card }))
     .catch((err) => {
       if(err.name === "ValidationError") {
-        res.status(400).send({ message: 'Переданы некорректные данные' })
+        res.status(400).send({ message: err.message.split(": ")[2] })
       } else {
         res.status(500).send({ message: 'На сервере произошла ошибка' })
       }
