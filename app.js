@@ -2,9 +2,12 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const process = require('process');
+const helmet = require('helmet'); // библиотека для защиты от уязвимостей
 
 const { PORT = 3000 } = process.env;
 const app = express();
+
+app.use(helmet());
 
 app.use((req, res, next) => {
   req.user = {
