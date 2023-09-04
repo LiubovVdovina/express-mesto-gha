@@ -6,11 +6,14 @@ const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const process = require('process');
 const helmet = require('helmet'); // библиотека для защиты от уязвимостей
+const { errors } = require('celebrate');
 const auth = require('./middlewares/auth');
 
 const {
   createUser, login,
 } = require('./controllers/users');
+
+const { signUpValidation } = require('./middlewares/validators/userValidator');
 
 const { PORT = 3000 } = process.env;
 const app = express();
@@ -23,7 +26,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 mongoose.connect('mongodb://localhost:27017/mestodb', { });
 
 app.post('/signin', login);
-app.post('/signup', createUser);
+app.post('/signup', signUpValidation, createUser);
 
 // Все роуты ниже защищены авторизацией
 app.use(auth);
@@ -35,6 +38,7 @@ app.use('*', (req, res, next) => {
   next(new DocumentNotFoundError());
 });
 
+app.use(errors());
 app.use(require('./middlewares/errorHandler'));
 
 app.listen(PORT, () => {
