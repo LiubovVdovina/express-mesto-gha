@@ -14,7 +14,13 @@ function createUser(req, res, next) {
       email,
       password: hash,
     }))
-    .then((user) => res.status(201).send({ user }))
+    .then((user) => res.status(201).send({
+      name: user.name,
+      about: user.about,
+      avatar: user.avatar,
+      email: user.email,
+      _id: user._id,
+    }))
     .catch(next);
 }
 

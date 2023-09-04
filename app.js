@@ -13,7 +13,7 @@ const {
   createUser, login,
 } = require('./controllers/users');
 
-const { signUpValidation } = require('./middlewares/validators/userValidator');
+const { signUpValidation, signInValidation } = require('./middlewares/validators/userValidator');
 
 const { PORT = 3000 } = process.env;
 const app = express();
@@ -25,7 +25,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 mongoose.connect('mongodb://localhost:27017/mestodb', { });
 
-app.post('/signin', login);
+app.post('/signin', signInValidation, login);
 app.post('/signup', signUpValidation, createUser);
 
 // Все роуты ниже защищены авторизацией
