@@ -1,73 +1,85 @@
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 
-function createUser(req, res) {
-  const { name, about, avatar } = req.body;
-  User.create({ name, about, avatar })
+function createUser(req, res, next) {
+  const {
+    name, about, avatar, email, password,
+  } = req.body;
+  bcrypt.hash(password, 10)
+    .then((hash) => User.create({
+      name,
+      about,
+      avatar,
+      email,
+      password: hash,
+    }))
     .then((user) => res.status(201).send({ user }))
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        res.status(400).send({ message: err.message.split(': ')[2] });
-      } else {
-        res.status(500).send({ message: 'На сервере произошла ошибка' });
-      }
-    });
+    .catch(next);
 }
 
-function getUsers(req, res) {
+function getUsers(req, res, next) {
   User.find({})
     .then((users) => res.status(200).send({ users }))
-    .catch(() => res.status(500).send({ message: 'На сервере произошла ошибка' }));
+    .catch(next);
 }
 
-function getUser(req, res) {
+function getUser(req, res, next) {
   User.findById(req.params.userId)
-    .orFail(() => res.status(404).send({ message: 'Пользователь с переданным id не найден' }))
+    .orFail()
     .then((user) => res.status(200).send({ user }))
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        res.status(400).send({ message: 'Передан некорректный id пользователя' });
-      } else {
-        res.status(500).send({ message: 'На сервере произошла ошибка' });
-      }
-    });
+    .catch(next);
 }
 
-function updateUser(req, res) {
+function updateUser(req, res, next) {
   const { name, about } = req.body;
   User.findByIdAndUpdate(req.user._id, { name, about }, { new: true, runValidators: true })
-    .orFail(() => res.status(404).send({ message: 'Пользователь с переданным id не найден' }))
+    .orFail()
     .then((user) => res.status(200).send({ user }))
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        res.status(400).send({ message: err.message.split(': ')[2] });
-      } else if (err.name === 'CastError') {
-        res.status(400).send({ message: 'Переданы некорректные данные' });
-      } else {
-        res.status(500).send({ message: 'На сервере произошла ошибка' });
-      }
-    });
+    .catch(next);
 }
 
-function updateAvatar(req, res) {
-  console.log(`Запущен контроллер обновления аватара пользователя ${req.user._id} на ссылку ${req.body.avatar}`);
+function updateAvatar(req, res, next) {
   User.findByIdAndUpdate(
     req.user._id,
     { avatar: req.body.avatar },
     { new: true, runValidators: true },
   )
-    .orFail(() => res.status(404).send({ message: 'Пользователь с переданным id не найден' }))
+    .orFail()
     .then((user) => res.status(200).send({ user }))
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        res.status(400).send({ message: err.message.split(': ')[2] });
-      } else if (err.name === 'CastError') {
-        res.status(400).send({ message: 'Переданы некорректные данные' });
-      } else {
-        res.status(500).send({ message: 'На сервере произошла ошибка' });
-      }
-    });
+    .catch(next);
+}
+
+function login(req, res, next) {
+  const { email, password } = req.body;
+
+  return User.findUserByCredentials(email, password)
+    .then((user) => {
+      // аутентификация успешна! пользователь в переменной user
+      const { NODE_ENV, JWT_SECRET } = process.env;
+      const token = jwt.sign(
+        { _id: user._id },
+        NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret',
+        { expiresIn: '7d' },
+      );
+      // отправим токен, браузер сохранит его в куках
+      res
+        .cookie('jwt', token, {
+        // token - наш JWT токен, который мы отправляем
+          maxAge: '604800',
+          httpOnly: true,
+        })
+        .end(); // если у ответа нет тела, можно использовать метод end
+    })
+    .catch(next);
+}
+
+function getCurrentUser(req, res, next) {
+  User.findById(req.user._id)
+    .then((user) => res.send({ user }))
+    .catch(next);
 }
 
 module.exports = {
-  createUser, getUsers, getUser, updateUser, updateAvatar,
+  createUser, getUsers, getUser, updateUser, updateAvatar, login, getCurrentUser,
 };

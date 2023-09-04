@@ -1,34 +1,41 @@
+require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
+const { DocumentNotFoundError } = require('mongoose').Error;
 const bodyParser = require('body-parser');
+const cookieParser = require('cookie-parser');
 const process = require('process');
 const helmet = require('helmet'); // библиотека для защиты от уязвимостей
+const auth = require('./middlewares/auth');
+
+const {
+  createUser, login,
+} = require('./controllers/users');
 
 const { PORT = 3000 } = process.env;
 const app = express();
-
+app.use(cookieParser()); // подключаем парсер кук как мидлвэр
 app.use(helmet());
-
-app.use((req, res, next) => {
-  req.user = {
-    _id: '64e99face78a4415a3cd29e6', // вставьте сюда _id созданного в предыдущем пункте пользователя
-  };
-  next();
-});
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 mongoose.connect('mongodb://localhost:27017/mestodb', { });
 
+app.post('/signin', login);
+app.post('/signup', createUser);
+
+// Все роуты ниже защищены авторизацией
+app.use(auth);
+
 app.use('/', require('./routes/users'));
 app.use('/', require('./routes/cards'));
 
-app.use('*', (req, res) => {
-  res.status(404).send({
-    message: 'Запрашиваемый адрес не найден.',
-  });
+app.use('*', (req, res, next) => {
+  next(new DocumentNotFoundError());
 });
+
+app.use(require('./middlewares/errorHandler'));
 
 app.listen(PORT, () => {
   console.log('Сервер запущен');

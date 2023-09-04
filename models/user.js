@@ -1,30 +1,65 @@
+const bcrypt = require('bcryptjs');
 const mongoose = require('mongoose');
 const validator = require('validator');
+const AuthorizationError = require('../errors/authorization-err');
+
+const LINK = /^((ftp|http|https):\/\/)?(www\.)?([A-Za-zА-Яа-я0-9]{1}[A-Za-zА-Яа-я0-9-]*\.?)*\.{1}[A-Za-zА-Яа-я0-9-]{2,8}(\/([\w#!:.?+=&%@!\-/])*)?/im;
 
 const userSchema = new mongoose.Schema(
   {
     name: {
       type: String,
-      required: [true, 'Поле \'name\' должно быть заполнено'],
+      default: 'Жак-Ив Кусто',
       minlength: [2, 'Минимальная длина поля \'name\' - 2'],
       maxlength: [30, 'Максимальная длина поля \'name\' - 30'],
     },
     about: {
       type: String,
-      required: [true, 'Поле \'about\' должно быть заполнено'],
+      default: 'Исследователь',
       minlength: [2, 'Минимальная длина поля \'about\' - 2'],
       maxlength: [30, 'Максимальная длина поля \'about\' - 30'],
     },
     avatar: {
       type: String,
-      required: [true, 'Поле \'avatar\' должно быть заполнено'],
+      default: 'https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png',
       validate: {
-        validator: (v) => validator.isURL(v),
+        validator: (v) => LINK.test(v),
         message: 'Некорректный URL',
       },
+    },
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      validate: {
+        validator: (v) => validator.isEmail(v),
+        message: 'Некорректный Email',
+      },
+    },
+    password: {
+      type: String,
+      required: true,
+      select: false,
     },
   },
   { versionKey: false },
 );
+
+userSchema.statics.findUserByCredentials = function (email, password) {
+  return this.findOne({ email }).select('+password')
+    .then((user) => {
+      if (!user) {
+        throw new AuthorizationError();
+      }
+
+      return bcrypt.compare(password, user.password)
+        .then((matched) => {
+          if (!matched) {
+            throw new AuthorizationError();
+          }
+          return user; // теперь user доступен
+        });
+    });
+};
 
 module.exports = mongoose.model('user', userSchema);
