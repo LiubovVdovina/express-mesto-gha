@@ -75,7 +75,8 @@ function login(req, res, next) {
           maxAge: '604800',
           httpOnly: true,
         })
-        .end(); // если у ответа нет тела, можно использовать метод end
+        .status(200)
+        .send({ message: 'Авторизация прошла успешно' });
     })
     .catch(next);
 }
