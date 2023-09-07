@@ -8,6 +8,8 @@ const helmet = require('helmet'); // библиотека для защиты о
 const { errors } = require('celebrate');
 const NotFoundError = require('./errors/not-found-err');
 const auth = require('./middlewares/auth');
+const { requestLogger, errorLogger } = require('./middlewares/logger');
+const cors = require('./middlewares/cors');
 
 const {
   createUser, login, logout,
@@ -23,7 +25,17 @@ app.use(helmet());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
+app.use(cors);
+
 mongoose.connect('mongodb://127.0.0.1:27017/mestodb', { });
+
+app.use(requestLogger); // подключаем логгер запросов
+
+app.get('/crash-test', () => {
+  setTimeout(() => {
+    throw new Error('Сервер сейчас упадёт');
+  }, 0);
+});
 
 app.post('/signin', signInValidation, login);
 app.post('/signup', signUpValidation, createUser);
@@ -38,6 +50,8 @@ app.use('/', require('./routes/cards'));
 app.use('*', (req, res, next) => {
   next(new NotFoundError('Страница с таким адресом не найдена'));
 });
+
+app.use(errorLogger); // подключаем логгер ошибок
 
 app.use(errors());
 app.use(require('./middlewares/errorHandler'));
