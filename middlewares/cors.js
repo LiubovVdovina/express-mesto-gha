@@ -1,11 +1,12 @@
 const allowedCors = [
   'http://mestollogy.nomoredomainsicu.ru',
-  'https://mestollogy.nomoredomainsicu.ru/',
-  'http://158.160.80.46',
+  'https://mestollogy.nomoredomainsicu.ru',
+  'http://158.160.80.46', // ip сервера с фронтендом
   'https://158.160.80.46',
   'http://localhost:3000',
-  'http:176.116.164.220', // мой статичный ip
-  'https:176.116.164.220',
+  'http://171.33.255.212', // мой статичный ip
+  'https://171.33.255.212',
+  'http://localhost:3001',
 ];
 
 const DEFAULT_ALLOWED_METHODS = 'GET,HEAD,PUT,PATCH,POST,DELETE';

@@ -67,7 +67,7 @@ function dislikeCard(req, res, next) {
     .orFail(() => {
       throw new NotFoundError('Карточка с переданным ID не найдена');
     })
-    .then((card) => res.send({ data: card }))
+    .then((card) => res.send({ card }))
     .catch((err) => {
       if (err.name === 'CastError') {
         next(new BadRequestError('Некорректный ID карточки'));
